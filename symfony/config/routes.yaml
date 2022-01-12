@@ -6,6 +6,10 @@ kernel:
     resource: ../src/Kernel.php
     type: annotation
 
+redirect:
+    path: /{hash}
+    controller: App\Controller\RedirectLinkController::redirectLink
+
 home:
-    path: /test
+    path: /
     controller: App\Controller\HomePageController::index

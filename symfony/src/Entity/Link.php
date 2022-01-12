@@ -26,6 +26,9 @@ class Link
     #[ORM\Column(type: 'string', length: 255)]
     private $ip;
 
+    #[ORM\Column(type: 'integer')]
+    private $count;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -63,6 +66,25 @@ class Link
     public function setIp(string $ip): self
     {
         $this->ip = $ip;
+
+        return $this;
+    }
+
+    public function startCount(): self
+    {
+        $this->count = 0;
+
+        return $this;
+    }
+
+    public function getCount(): ?int
+    {
+        return $this->count;
+    }
+
+    public function incrementCount(): self
+    {
+        $this->count++;
 
         return $this;
     }

@@ -29,7 +29,7 @@ class HomePageController extends AbstractController
     {
 
         $form = $this->getForm();
-
+        $newLink = false;
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -40,9 +40,9 @@ class HomePageController extends AbstractController
             if($link) {
                 return $this->render('home_page/index.html.twig', [
                     'form' => $form->createView(),
-                    'save' => true,
                     'haveLink' => true,
                     'allUserLinks' => $this->getAllUserLinks(),
+                    'domain' => $this->getParameter('domain'),
                 ]);
             }
 
@@ -50,7 +50,8 @@ class HomePageController extends AbstractController
             $hash = md5($link->getLink() . $link->getIp());
             $link->setHash($hash);
             $link->setIp($this->getUserIp());
-
+            $link->startCount();
+            $newLink = $link->getLink();
             $this->entityManager->persist($link);
             $this->entityManager->flush();
 
@@ -58,14 +59,17 @@ class HomePageController extends AbstractController
 
         return $this->render('home_page/index.html.twig', [
             'form' => $form->createView(),
-            'save' => false,
             'allUserLinks' => $this->getAllUserLinks(),
+            'domain' => $this->getParameter('domain'),
+            'save' => true,
+            'newLink' => $newLink,
         ]);
 
     }
 
     public function getForm()
     {
+
         $link = new Link();
 
         $form = $this->createFormBuilder($link)

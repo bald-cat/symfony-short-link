@@ -3,12 +3,8 @@
 {% block title %}Hello HomePageController!{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
+<div>
     <h1>Сокращатель ссылок</h1>
     {{ form(form) }}
     {% if haveLink is defined %}
@@ -16,18 +12,18 @@
     {% endif %}
 
     {% if allUserLinks|length > 0 %}
-
+        <h3>Ваши ссылки:</h3>
         <table border="1">
             <tr>
                 <th>Ссылка</th>
                 <th>Короткая ссылка</th>
-                <th>Кол-во просмотров</th>
+                <th>Кол-во переходов по ссылке</th>
             </tr>
             {% for link in allUserLinks %}
                 <tr>
                     <td><a href="{{ link.link }}">{{ link.link }}</a></td>
-                    <td><a>http://127.0.0.1/{{ link.hash }}</a></td>
-                    <td>Нужно доделать</td>
+                    <td><a href="{{ domain }}{{ link.hash }}">{{ domain }}{{ link.hash }}</a></td>
+                    <td>{{ link.count }}</td>
                 </tr>
 
             {% endfor %}
