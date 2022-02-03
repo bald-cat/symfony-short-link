@@ -19,17 +19,21 @@ class HomePageController extends AbstractController
     public function index(Request $request, ManagerRegistry $doctrine): Response
     {
 
+        $entityManager = $doctrine->getManager();
+
+        $allUserLinks = $entityManager->getRepository(Link::class)->findBy([
+            'ip' => $this->getUserIp(),
+        ]);
+
         $link = new Link();
 
         $form = $this->createFormBuilder($link)
-            ->add('link', TextType::class)
-            ->add('save', SubmitType::class, ['label' => 'Create Task'])
+            ->add('link', TextType::class, ['label' => 'Ссылка'])
+            ->add('save', SubmitType::class, ['label' => 'Сгенерировать короткую ссылку'])
             ->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $entityManager = $doctrine->getManager();
 
             $link = $entityManager->getRepository(Link::class)->findBy([
                 'link' => $form->get('link')->getData(),
@@ -40,6 +44,7 @@ class HomePageController extends AbstractController
                     'form' => $form->createView(),
                     'save' => true,
                     'haveLink' => true,
+                    'allUserLinks' => array_reverse($allUserLinks),
                 ]);
             }
 
@@ -51,17 +56,20 @@ class HomePageController extends AbstractController
             $entityManager->persist($link);
             $entityManager->flush();
 
-            return $this->render('home_page/index.html.twig', [
-                'form' => $form->createView(),
-                'save' => true,
-            ]);
         }
 
-        $userLinks = $doctrine->getRepository(Link::class)->findBy(['ip' => $this->getUserIp()]);
+        $allUserLinks = $entityManager->getRepository(Link::class)->findBy([
+            'ip' => $this->getUserIp(),
+        ]);
+
+        $userLinks = $doctrine
+        ->getRepository(Link::class)
+        ->findBy(['ip' => $this->getUserIp()]);
 
         return $this->render('home_page/index.html.twig', [
             'form' => $form->createView(),
             'save' => false,
+            'allUserLinks' => array_reverse($allUserLinks),
         ]);
 
     }

@@ -14,5 +14,30 @@
     {% if haveLink is defined %}
         У вас уже есть такая ссылка!
     {% endif %}
+
+    {% if allUserLinks|length > 0 %}
+
+        <table border="1">
+            <tr>
+                <th>Ссылка</th>
+                <th>Короткая ссылка</th>
+                <th>Кол-во просмотров</th>
+            </tr>
+            {% for link in allUserLinks %}
+                <tr>
+                    <td><a href="{{ link.link }}">{{ link.link }}</a></td>
+                    <td><a>http://127.0.0.1/{{ link.hash }}</a></td>
+                    <td>Нужно доделать</td>
+                </tr>
+
+            {% endfor %}
+        </table>
+
+
+
+
+
+    {% endif %}
+
 </div>
 {% endblock %}
