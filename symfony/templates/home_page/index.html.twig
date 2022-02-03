@@ -10,6 +10,9 @@
 
 <div class="example-wrapper">
     <h1>Сокращатель ссылок</h1>
-
+    {{ form(form) }}
+    {% if haveLink is defined %}
+        У вас уже есть такая ссылка!
+    {% endif %}
 </div>
 {% endblock %}
