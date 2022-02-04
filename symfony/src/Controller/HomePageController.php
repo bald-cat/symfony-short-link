@@ -6,36 +6,34 @@ use App\Entity\Link;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 
 
 class HomePageController extends AbstractController
 {
 
+    protected $entityManager;
+
+    public function __construct(ManagerRegistry $doctrine)
+    {
+        $this->entityManager = $doctrine->getManager();
+    }
+
+    /**
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     */
     public function index(Request $request, ManagerRegistry $doctrine): Response
     {
 
-        $entityManager = $doctrine->getManager();
-
-        $allUserLinks = $entityManager->getRepository(Link::class)->findBy([
-            'ip' => $this->getUserIp(),
-        ]);
-
-        $link = new Link();
-
-        $form = $this->createFormBuilder($link)
-            ->add('link', TextType::class, ['label' => 'Ссылка'])
-            ->add('save', SubmitType::class, ['label' => 'Сгенерировать короткую ссылку'])
-            ->getForm();
+        $form = $this->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $link = $entityManager->getRepository(Link::class)->findBy([
+            $link = $this->entityManager->getRepository(Link::class)->findBy([
                 'link' => $form->get('link')->getData(),
             ]);
 
@@ -44,7 +42,7 @@ class HomePageController extends AbstractController
                     'form' => $form->createView(),
                     'save' => true,
                     'haveLink' => true,
-                    'allUserLinks' => array_reverse($allUserLinks),
+                    'allUserLinks' => $this->getAllUserLinks(),
                 ]);
             }
 
@@ -53,25 +51,29 @@ class HomePageController extends AbstractController
             $link->setHash($hash);
             $link->setIp($this->getUserIp());
 
-            $entityManager->persist($link);
-            $entityManager->flush();
+            $this->entityManager->persist($link);
+            $this->entityManager->flush();
 
         }
-
-        $allUserLinks = $entityManager->getRepository(Link::class)->findBy([
-            'ip' => $this->getUserIp(),
-        ]);
-
-        $userLinks = $doctrine
-        ->getRepository(Link::class)
-        ->findBy(['ip' => $this->getUserIp()]);
 
         return $this->render('home_page/index.html.twig', [
             'form' => $form->createView(),
             'save' => false,
-            'allUserLinks' => array_reverse($allUserLinks),
+            'allUserLinks' => $this->getAllUserLinks(),
         ]);
 
+    }
+
+    public function getForm()
+    {
+        $link = new Link();
+
+        $form = $this->createFormBuilder($link)
+            ->add('link', TextType::class, ['label' => 'Ссылка'])
+            ->add('save', SubmitType::class, ['label' => 'Сгенерировать короткую ссылку'])
+            ->getForm();
+
+        return $form;
     }
 
     /**
@@ -87,9 +89,17 @@ class HomePageController extends AbstractController
         return $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
     }
 
-    public function saveLink(Request $request, $link)
+    /**
+     * Method for return all user links
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getAllUserLinks(): array
     {
-//
+        return array_reverse($this->entityManager->getRepository(Link::class)->findBy([
+            'ip' => $this->getUserIp(),
+        ]));
     }
 
 }
