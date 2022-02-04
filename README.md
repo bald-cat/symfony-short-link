@@ -1,4 +1,4 @@
-# Symfony 6 Docker-Development-Stack
+# Symfony Short limk
 
 
 Чтобы запустить проект нужно: 
